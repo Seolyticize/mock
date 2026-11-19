@@ -74,7 +74,31 @@ export function success(
   };
 }
 
-/** 200 with ok:false: a tool that declined as data (not connected, nothing to do). */
+/**
+ * The status a refusal answers with: 402 money, 422 input to change, 409 the
+ * rest. A copy of @seolyticize/mcp's refusalStatus (this package ships with no
+ * dependencies); answers.test.ts holds the two to the same answers.
+ */
+export function refusalStatus(code: string): 402 | 409 | 422 {
+  const normal = code.replaceAll("-", "_");
+  if (
+    [
+      "budget_exceeded",
+      "over_spend_limit",
+      "spend_cap_exceeded",
+      "plan_limit",
+      "vendor_balance_empty",
+    ].includes(normal)
+  )
+    return 402;
+  return /^(?:(?:invalid|malformed|missing|bad|unsupported|mistyped|too_many)_.+|too_many|.+_(?:required|too_long|too_large)|empty_list_name|unrecognised_csv|incomplete_credential|unsafe_target|idempotency_key_reused)$/.test(
+    normal,
+  )
+    ? 422
+    : 409;
+}
+
+/** 409 (by its code) with ok:false: a tool that declined as data (not connected, nothing to do). */
 export function declined(refused: string, reason: string, next?: unknown) {
   const data = { refused, reason, ...(next === undefined ? {} : { next }) };
   return {
@@ -158,8 +182,8 @@ export type RecordedAnswer = {
  * Every answer each tool can give, derived from the OpenAPI document and, when
  * given, the error catalogue (GET /api/v1/errors): the success (with outcome
  * applied for a write), noop for a write, the 202 any slow call answers, the
- * 400 its required fields cause, 401, and a 422 for each catalogued code
- * named in `refusals` (default: refused).
+ * 400 its required fields cause, 401, and a refusal for each catalogued code
+ * named in `refusals` (default: refused), at its status (402, 409 or 422).
  */
 export function recordedAnswers(
   spec: OpenApiDocument,
@@ -212,7 +236,7 @@ export function recordedAnswers(
       const entry = catalogue.get(code);
       answers.push({
         scenario: code,
-        status: 422,
+        status: refusalStatus(code),
         request: { tool, input },
         body: refusal(code, entry?.meaning ?? `Refused (${code}).`, entry?.fix),
       });

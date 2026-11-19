@@ -65,10 +65,10 @@ line, or the `X-Mock-Scenario: …` header on one call:
 | `noop`               | `200`, `outcome: "noop"`, `reason: "already_exists"`                                                                                                                              |
 | `partial`, `skipped` | `200`, that outcome, with `some_failed` or `dry_run`                                                                                                                              |
 | `queued`             | `202 { ok, outcome: "queued", jobId, idempotencyKey, pollAfterSeconds }`; the same body sent again with that `Idempotency-Key` answers the fixture. The SDK does this on its own. |
-| `declined`           | `200 { ok: false, refused, reason }`, a tool declining as data                                                                                                                    |
-| any other string     | `422` with that code, and the catalogue's sentence and fix when `errors` is given (`unknown_client`, `plan_limit`, …)                                                             |
+| `declined`           | `409 { ok: false, refused, reason }`, a tool declining as data                                                                                                                    |
+| any other string     | `402`, `409` or `422` (as the API answers that code) with it, and the catalogue's sentence and fix when `errors` is given (`unknown_client`, `plan_limit`, …)                     |
 
-`X-Mock-Refuse: <code>` still works as a shortcut for a `422`.
+`X-Mock-Refuse: <code>` still works as a shortcut for a refusal with that code.
 
 ## Recorded answers and fixtures
 
@@ -87,7 +87,7 @@ import {
 success({ clients: [] }); // a read
 success({ id: "c1" }, "noop"); // a write that was already so
 accepted("call_1"); // the 202 of a slow call
-refusal("plan_limit", "Over the plan."); // a 422 body
+refusal("plan_limit", "Over the plan."); // a refusal body (402 for plan_limit)
 
 // Every tool's answers, derived from the OpenAPI document and the error catalogue:
 const recorded = recordedAnswers(spec, { errors, refusals: ["unknown_client"] });

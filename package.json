@@ -1,6 +1,6 @@
 {
   "name": "@seolyticize/mock",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "A stand-in for the Seolyticize API, answering from its OpenAPI document with your fixtures: a server (npx @seolyticize/mock) or a fetch for unit tests.",
   "type": "module",
   "license": "MIT",

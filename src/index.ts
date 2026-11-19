@@ -17,6 +17,7 @@ import {
   declined,
   OUTCOME_REASONS,
   refusal,
+  refusalStatus,
   success,
   toolsOf,
   type ErrorCatalogue,
@@ -32,8 +33,8 @@ export type Fixture =
 
 /**
  * How a tool answers: an outcome (applied is the default for a write), queued
- * (202, then the answer when collected), declined (200 ok:false), or any other
- * string, which is a refusal code answered 422.
+ * (202, then the answer when collected), declined (409 ok:false), or any other
+ * string, which is a refusal code answered 402, 409 or 422 as the API would.
  */
 export type Scenario = Outcome | "declined" | (string & {});
 
@@ -88,7 +89,7 @@ export function createMock(options: MockOptions): Mock {
     const entry = catalogue.get(code);
     return json(
       refusal(code, entry?.meaning ?? `Refused by the mock (${code}).`, entry?.fix),
-      422,
+      refusalStatus(code),
     );
   };
 
@@ -153,7 +154,10 @@ export function createMock(options: MockOptions): Mock {
       return refuseAs(scenario);
     calls.push({ tool: name, input: body });
     if (scenario === "declined")
-      return json(declined("not_connected", "Nothing is connected for this (mock)."));
+      return json(
+        declined("not_connected", "Nothing is connected for this (mock)."),
+        refusalStatus("not_connected"),
+      );
     const fixture = options.fixtures?.[name];
     const data = typeof fixture === "function" ? await fixture(body) : (fixture ?? {});
     // A collected 202 is the call's own answer: applied, for a write.
