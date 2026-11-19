@@ -1,0 +1,50 @@
+{
+  "name": "@seolyticize/mock",
+  "version": "0.2.0",
+  "description": "A stand-in for the Seolyticize API, answering from its OpenAPI document with your fixtures: a server (npx @seolyticize/mock) or a fetch for unit tests.",
+  "type": "module",
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./server": {
+      "types": "./dist/server.d.ts",
+      "default": "./dist/server.js"
+    },
+    "./fixtures": {
+      "types": "./dist/answers.d.ts",
+      "default": "./dist/answers.js"
+    }
+  },
+  "bin": {
+    "seolyticize-mock": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18.3"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "prepare": "npm run build"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "@types/node": "^22.18.13"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Seolyticize/mock.git"
+  },
+  "homepage": "https://github.com/Seolyticize/mock#readme",
+  "bugs": {
+    "url": "https://github.com/Seolyticize/mock/issues"
+  }
+}
