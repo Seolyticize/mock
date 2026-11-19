@@ -23,7 +23,12 @@ export async function startMockServer(
           body: req.method === "GET" || req.method === "HEAD" ? undefined : body,
         },
       );
-      res.writeHead(answer.status, Object.fromEntries(answer.headers));
+      // forEach rather than iterating Headers, which not every @types/node declares iterable.
+      const out: Record<string, string> = {};
+      answer.headers.forEach((value, key) => {
+        out[key] = value;
+      });
+      res.writeHead(answer.status, out);
       res.end(Buffer.from(await answer.arrayBuffer()));
     });
   });
